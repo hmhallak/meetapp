@@ -18,7 +18,6 @@ class MeetupController {
       include: [
         {
           model: User,
-          as: 'user',
           attributes: ['id', 'name'],
           include: [
             {
@@ -30,7 +29,6 @@ class MeetupController {
         },
         {
           model: File,
-          as: 'banner',
           attributes: ['id', 'path', 'url'],
         },
       ],

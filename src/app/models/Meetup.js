@@ -1,4 +1,4 @@
-import { isBefore } from 'date-fns';
+import { isBefore, parseISO } from 'date-fns';
 import Sequelize, { Model } from 'sequelize';
 
 class Meetup extends Model {
@@ -12,7 +12,7 @@ class Meetup extends Model {
         past: {
           type: Sequelize.VIRTUAL,
           get() {
-            return isBefore(this.date, new Date());
+            return isBefore(parseISO(this.date), new Date());
           },
         },
       },
@@ -25,8 +25,9 @@ class Meetup extends Model {
   }
 
   static associate(models) {
-    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
-    this.belongsTo(models.File, { foreignKey: 'banner_id', as: 'banner' });
+    this.hasMany(models.Subscription, { foreignKey: 'meetup_id' });
+    this.belongsTo(models.File, { foreignKey: 'banner_id' });
+    this.belongsTo(models.User, { foreignKey: 'user_id' });
   }
 }
 

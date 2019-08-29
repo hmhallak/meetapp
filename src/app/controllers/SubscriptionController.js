@@ -1,0 +1,66 @@
+import Subscription from '../models/Subscription';
+import Meetup from '../models/Meetup';
+import User from '../models/User';
+
+class SubscriptionController {
+  async store(req, res) {
+    const user = await User.findByPk(req.userId);
+
+    const meetup = await Meetup.findByPk(req.params.meetupId, {
+      include: [User],
+    });
+
+    /**
+     * Check for past meetup
+     */
+    if (meetup.past) {
+      return res
+        .status(400)
+        .json({ error: 'Cannot subscribe to past meetups.' });
+    }
+
+    /**
+     * Check if the user is not the meetup organizer
+     */
+    if (meetup.user_id === user.id) {
+      return res
+        .status(400)
+        .json({ error: 'You cannot subscribe to a meetup organized by you.' });
+    }
+
+    /**
+     * Check if the user is subscribed to a meetup with the same date and time
+     */
+    const checkDate = await Subscription.findOne({
+      where: {
+        user_id: user.id,
+      },
+      include: [
+        {
+          model: Meetup,
+          required: true,
+          where: {
+            date: meetup.date,
+          },
+        },
+      ],
+    });
+
+    console.log('teste');
+
+    if (checkDate) {
+      return res.status(400).json({
+        error: "Can't subscribe to two meetups with the same date and time.",
+      });
+    }
+
+    const subscription = await Subscription.create({
+      user_id: user.id,
+      meetup_id: meetup.id,
+    });
+
+    return res.json(subscription);
+  }
+}
+
+export default new SubscriptionController();
