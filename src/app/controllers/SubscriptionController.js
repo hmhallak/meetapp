@@ -1,6 +1,7 @@
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import Notification from '../schemas/Notification';
 
 import SubscriptionMail from '../jobs/SubscriptionMail';
 import Queue from '../../lib/Queue';
@@ -63,6 +64,14 @@ class SubscriptionController {
     await Queue.add(SubscriptionMail.key, {
       meetup,
       user,
+    });
+
+    /**
+     *  Notifify meetup Organizer
+     */
+    await Notification.create({
+      content: `${user.name} se inscreveu no seu meetup ${meetup.title}`,
+      user: meetup.user_id,
     });
 
     return res.json(subscription);
