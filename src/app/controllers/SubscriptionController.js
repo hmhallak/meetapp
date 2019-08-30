@@ -2,6 +2,9 @@ import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 
+import SubscriptionMail from '../jobs/SubscriptionMail';
+import Queue from '../../lib/Queue';
+
 class SubscriptionController {
   async store(req, res) {
     const user = await User.findByPk(req.userId);
@@ -46,8 +49,6 @@ class SubscriptionController {
       ],
     });
 
-    console.log('teste');
-
     if (checkDate) {
       return res.status(400).json({
         error: "Can't subscribe to two meetups with the same date and time.",
@@ -57,6 +58,11 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: user.id,
       meetup_id: meetup.id,
+    });
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      user,
     });
 
     return res.json(subscription);
