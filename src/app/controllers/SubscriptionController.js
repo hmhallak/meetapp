@@ -35,7 +35,12 @@ class SubscriptionController {
     const user = await User.findByPk(req.userId);
 
     const meetup = await Meetup.findByPk(req.params.meetupId, {
-      include: [User],
+      include: [
+        {
+          model: User,
+          as: 'user',
+        },
+      ],
     });
 
     /**
@@ -54,6 +59,22 @@ class SubscriptionController {
       return res
         .status(400)
         .json({ error: 'You cannot subscribe to a meetup organized by you.' });
+    }
+
+    /**
+     * Check if the user is already subscribed to the meetup
+     */
+    const checkSubscribed = await Subscription.findOne({
+      where: {
+        user_id: user.id,
+        meetup_id: meetup.id,
+      },
+    });
+
+    if (checkSubscribed) {
+      return res.status(400).json({
+        error: 'You are already subscribed to this meetup.',
+      });
     }
 
     /**
