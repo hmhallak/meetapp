@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 import Notification from '../schemas/Notification';
 
 import SubscriptionMail from '../jobs/SubscriptionMail';
@@ -23,6 +24,16 @@ class SubscriptionController {
             },
           },
           required: true,
+          include: [
+            {
+              model: User,
+              as: 'user',
+            },
+            {
+              model: File,
+              as: 'banner',
+            },
+          ],
         },
       ],
       order: [[Meetup, 'date']],
@@ -120,6 +131,25 @@ class SubscriptionController {
     });
 
     return res.json(subscription);
+  }
+
+  async delete(req, res) {
+    const user_id = req.userId;
+
+    const subscription = await Subscription.findByPk(req.params.id);
+
+    /**
+     * Checks if logged user is the owner
+     */
+    if (subscription.user_id !== user_id) {
+      return res.status(401).json({
+        error: "You don't have permission to cancel this subscription.",
+      });
+    }
+
+    await subscription.destroy();
+
+    return res.send();
   }
 }
 
