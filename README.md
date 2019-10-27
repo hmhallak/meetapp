@@ -11,7 +11,7 @@ This app consists of an api built with NodeJS and Express, a web app built with 
 
 ## Environment
  - To run the system you'll need the following docker containers running:
-	 - PostgreSQL (https://hub.docker.com/_/postgres)
+	 - Postgres (https://hub.docker.com/_/postgres)
 	 - Redis (https://hub.docker.com/_/redis)
 	 - Mongo (https://hub.docker.com/_/mongo)
    
@@ -23,7 +23,7 @@ This app consists of an api built with NodeJS and Express, a web app built with 
 
 - Copy .env.example and rename to .env, then set your environment configs in .env file
 
-- Create your database in postgresql, then and run migrations:
+- Create your database in postgres and then run migrations:
  <code>yarn sequelize db:migrate</code>
 
 - Run server backend:
